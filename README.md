@@ -7,7 +7,7 @@
 **Entry Point**: `not detected`  
 **Codebase**: 6 source files, 5181 lines of production‑ready code  
 **Architecture**: Object‑oriented  
-**Key Components**: 13 class(es): BibleParser, DocumentChatInterface, WebChatHandler, WebChatServer, ConversationParticipant, 96 function(s): _generate_story_from_conversation, load_bible, _export_conversation, _pastoral_response, end_conversation
+**Key Components**: 13 class(es): BibleStoryGenerator, MultiDocumentProcessor, RealTimeDialogueEngine, ConversationAgent, WebChatHandler, 96 function(s): extract_keywords, verse_sort_key, _express_agreement, get_fresh_topic, generate_story_path
 
 MULTI-DOCUMENT REAL-TIME CONVERSATION SYSTEM
 
@@ -49,11 +49,12 @@ I am open to conversations about how I can apply this mindset to your organisati
 ## 💡 Benefits & Ecosystem Integration
 
 ### ✨ Key Benefits
-- Revenue Acceleration: Directly impacts top‑line growth by enabling faster time‑to‑market and personalisation.
-- Operational Efficiency: Reduces manual effort by 60‑80%, freeing up talent for higher‑value work.
-- Data‑Driven Decisions: Provides real‑time, accurate insights that inform strategic direction.
-- Scalability: Designed to handle growing volumes without proportional cost increases.
-- Risk Reduction: Automates compliance checks and error‑prone processes, minimising human error.
+- Sustainable Architecture: Reduces energy consumption, aligning technology with environmental goals.
+- Continuous Deployment: Enables safe, automated, and frequent releases to production.
+- Improved Developer Productivity: Streamlines workflows, reduces boilerplate, and improves developer happiness.
+- Personalised Customer Experiences: Delivers tailored interactions based on user behaviour and preferences.
+- Vendor Lock‑in Avoidance: Builds with open standards, ensuring flexibility and portability.
+- Low‑Latency Performance: Delivers near‑instantaneous responses for user‑facing applications.
 
 ### 🔗 Integrations
 - REST / GraphQL APIs (external services)
@@ -61,13 +62,10 @@ I am open to conversations about how I can apply this mindset to your organisati
 
 ## 📈 Scale to SaaS & Beyond
 
-- Cloud Deployment: Containerise with Docker and deploy to AWS, GCP, or Azure for global availability.
-- CI/CD Pipeline: Integrate GitHub Actions to automate testing and deployment with every commit.
-- API Monetisation: Wrap the core logic in a REST/GraphQL API and sell access via a subscription model.
-- Multi‑Tenancy: Extend to support multiple customers with isolated data and custom configurations.
-- Analytics Dashboard: Add real‑time monitoring and business intelligence dashboards.
-- Event‑Driven Architecture: Integrate with message queues (Kafka, RabbitMQ) for asynchronous workflows.
 - Third‑Party Integrations: Expand to additional CRM, ERP, or marketing automation tools.
+- Cloud Deployment: Containerise with Docker and deploy to AWS, GCP, or Azure for global availability.
+- Multi‑Tenancy: Extend to support multiple customers with isolated data and custom configurations.
+- API Monetisation: Wrap the core logic in a REST/GraphQL API and sell access via a subscription model.
 
 
 ## 📁 Project Structure
@@ -89,3 +87,16 @@ No run command detected
 - **Missing dependencies**: Ensure prerequisites are installed and in your PATH.
 - **Port conflicts**: If using a web server, check that the port is free.
 - **Configuration**: Double-check your `.env` or config files.
+
+## 📬 Contact & Collaboration
+
+**Name**: mis p  
+**Phone**: +1 647-717-0929  
+**Email**: [amit.mits.puri@gmail.com](mailto:amit.mits.puri@gmail.com)  
+
+I am open to freelance, contract, and full‑time opportunities. Feel free to reach out directly.
+
+> **💡 Want a contact form?**  
+> You can easily add a contact form to your GitHub Pages site using a free service like [Formspree](https://formspree.io/).  
+> Just create a `contact.html` page, embed the form, and it will forward messages to this email.  
+> *I can help you set that up if needed.*
