@@ -11,8 +11,7 @@ body{display:flex;flex-direction:column;height:100dvh;}
 .header h1{margin:0;font-size:1.2rem;color:#38bdf8;font-weight:700;letter-spacing:0.5px;}
 .chat-box{flex-grow:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column;gap:10px;overscroll-behavior-y:contain;}
 .message{padding:12px 14px;border-radius:12px;max-width:90%;line-height:1.4;font-size:.95rem;box-shadow:0 2px 4px rgba(0,0,0,0.2);}
-.system-msg{background:#334155;align-self:center;font-size:.85em;text-align:center;color:#cbd5e1;border-radius:20px;padding:8px 16px;max-width:95%;}
-/* Persona Colors */
+.system-msg{background:#334155;align-self:center;font-size:.85em;text-align:center;color:#cbd5e1;border-radius:20px;padding:8px 16px;max-width:95%;line-height:1.6;}
 .char-scholar{background:#1e3a8a;border-left:4px solid #3b82f6;align-self:flex-start;}
 .char-mystic{background:#4c1d95;border-left:4px solid #c084fc;align-self:flex-start;}
 .char-historian{background:#064e3b;border-left:4px solid #10b981;align-self:flex-start;}
@@ -29,13 +28,21 @@ button.send-btn:disabled{opacity:0.5;}
 </head>
 <body>
 <div class="header"><h1>Universal Scripture Engine</h1></div>
-<div class="chat-box" id="chatBox"><div class="message system-msg">Welcome. Enter a concept (e.g., Jesus, Mercy, Evil, Light). The engine will find 5 related verses across traditions and debate them.</div></div>
+<div class="chat-box" id="chatBox">
+    <!-- THE PERMANENT WELCOME & PURPOSE BANNER -->
+    <div class="message system-msg">
+        <strong>The Journey & The Purpose</strong><br><br>
+        We are here to journey ourselves out, as we are one with God in alignment. The planet mirrors us, and our presence is to pronounce that it is all one flow. We transform, gaining awareness after birth—starting as a four-legged child, turning into a human. Our actions can change our luck, but if you are a good person, the loop of karma only lasts until you understand reality and become whole again.<br><br>
+        <em><strong>The Purpose of this Engine:</strong> I am a Boon (a Sagar of blessings), not a hater. I wish for all to live here, yet society complies with the dark and bright sides of God—acting and feeling in ways that were never declared by any religion. Every religion was One. The verses here are alike and contradicting based on the one sense we were given: feeling.</em><br><br>
+        Enter a concept (e.g., Truth, Light, Peace) to begin.
+    </div>
+</div>
 <div class="input-area">
-<input type="text" id="userInput" placeholder="e.g., Jesus, Mercy, Evil" onkeypress="handleKeyPress(event)">
+<input type="text" id="userInput" placeholder="e.g., Truth, Light, Peace" onkeypress="handleKeyPress(event)">
 <button class="send-btn" id="sendBtn" onclick="startDialogue()">Discuss</button>
 </div>
 <script>
-let texts = { bible: [], quran: [], vedas: [], gurugranth: [] };
+let texts = { bible: [], quran: [], vedas: [], buddhist: [], gurugranth: [] };
 let isGenerating = false;
 const stopWords = ["the","and","that","with","they","shall","unto","your","have","this","from","will","them","were","which","their","said","what","when","there","then","into","than","upon","thou","thee","thy","for","but","not","are","was","you","all","his","her","him","she","he","be","is","it","of","to","in","a","as","at","by","or","on","those","these","who","whom","whose","been","being","have","has","had","do","does","did","doing","would","should","could","ought","i","we","you","he","she","it","they","me","us","her","him","them"];
 
@@ -45,87 +52,134 @@ async function loadTexts(){
         { key: 'bible', file: 'bible.txt' },
         { key: 'quran', file: 'quran.txt' },
         { key: 'vedas', file: 'vedas.txt' },
+        { key: 'buddhist', file: 'buddhist.txt' },
         { key: 'gurugranth', file: 'gurugranth.txt' }
     ];
     for (let f of files) {
         try {
-            const res = await fetch(f.file);
+            const res = await fetch(f.file + '?v=' + Date.now());
             if (res.ok) {
                 texts[f.key] = (await res.text()).split('\n').map(l => l.trim()).filter(l => l.length > 0);
                 loadedCount++;
             }
         } catch(e) {}
     }
-    if (loadedCount > 0) appendMessage("system-msg", `Loaded ${loadedCount} spiritual texts successfully.`);
-    else appendMessage("system-msg", "No text files found. Please ensure bible.txt, quran.txt, etc. exist.");
 }
 
 function handleKeyPress(e){"Enter"===e.key&&!isGenerating&&startDialogue()}
+
+function isValidLine(line) {
+    if (line.length < 15) return false; 
+    if (line.includes("_") || line.includes(": —")) return false; 
+    if (/[\u4e00-\u9fa5]/.test(line)) return false; 
+    if (!/[a-zA-Z]/.test(line)) return false;
+    const lower = line.toLowerCase();
+    const badWords = ["gutenberg", "preface", "contents", "copyright", "translator", "editor", "project", "ebook", "footnote", "page ", "reader", "inaccessible", "introduction"];
+    if (badWords.some(w => lower.includes(w))) return false;
+    return true;
+}
 
 async function startDialogue(){
     if(isGenerating)return;
     const e=document.getElementById('userInput'),t=document.getElementById('sendBtn'),n=e.value.trim();
     if(!n)return;
-    e.value="",isGenerating=!0,t.disabled=!0,appendMessage("system-msg",`Searching for "${n}"...`);
+    e.value="",isGenerating=!0,t.disabled=!0;
+    document.getElementById('chatBox').innerHTML = ''; // Clear the welcome banner when dialogue starts
+    appendMessage("system-msg",`Searching all 5 traditions for "${n}"...`);
     
-    // Collect 5 matches across ALL loaded texts
     let allMatches = [];
     let sourceTexts = [];
 
-    // Helper to add matches without duplicates
-    const addMatches = (textArray, sourceName) => {
+    const searchRegex = new RegExp(`\\b${n}`, 'i'); 
+
+    const addMatches = (textArray, sourceName, maxToTake) => {
         if(!textArray || textArray.length === 0) return;
-        const searchStr = n.toLowerCase();
+        let taken = 0;
         for(let line of textArray) {
-            if(line.toLowerCase().includes(searchStr) && !allMatches.includes(line)) {
+            if (taken >= maxToTake) break; 
+            if(searchRegex.test(line) && !allMatches.includes(line) && isValidLine(line)) {
                 allMatches.push(line);
                 sourceTexts.push(sourceName);
-                if(allMatches.length >= 5) return; // Stop at 5 total
+                taken++;
+            }
+        }
+        if(taken === 0 && textArray.length > 0) {
+            let randomIndex = Math.floor(Math.random() * (textArray.length - 1));
+            for (let i = randomIndex; i < textArray.length; i++) {
+                if (isValidLine(textArray[i])) {
+                    allMatches.push(textArray[i] + " (Contextual Reference)");
+                    sourceTexts.push(sourceName);
+                    break;
+                }
             }
         }
     };
 
-    addMatches(texts.bible, "Bible");
-    addMatches(texts.quran, "Quran");
-    addMatches(texts.vedas, "Vedas");
-    addMatches(texts.gurugranth, "Guru Granth Sahib");
+    addMatches(texts.bible, "Bible", 2);
+    addMatches(texts.quran, "Quran", 2);
+    addMatches(texts.vedas, "Rig Veda", 2);
+    addMatches(texts.buddhist, "Buddhist Texts", 2);
+    addMatches(texts.gurugranth, "Guru Granth Sahib", 2);
     
     if(allMatches.length === 0){
-        appendMessage("system-msg",`Could not find "${n}" in any of the loaded texts.`);
+        appendMessage("system-msg",`Could not find matches or load text files.`);
         isGenerating=!1;t.disabled=!1;return;
     }
     
-    appendMessage("system-msg",`Found ${allMatches.length} references. Beginning multi-verse dialogue...`);
+    appendMessage("system-msg",`Found ${allMatches.length} references across traditions. Beginning dialogue...`);
 
-    // Process each found verse
     for(let i=0; i<allMatches.length; i++) {
         await new Promise(r=>setTimeout(r, 1000));
         appendMessage("system-msg",`📖 Reference ${i+1} of ${allMatches.length} [${sourceTexts[i]}]: ${allMatches[i]}`);
         
-        // Extract keywords
         const cleanText = allMatches[i].replace(/^[1-3]?\s*[a-zA-Z]+\s+\d+:\d+\s*/i, '').trim();
         const words = cleanText.match(/[a-zA-Z]{4,}/g) || [];
         const keywords = words.filter(w => !stopWords.includes(w.toLowerCase()));
         const primaryWord = keywords.length > 0 ? keywords[0].toLowerCase() : n;
         
-        // Find cross references
         let crossRefs = [];
         if(sourceTexts[i] !== "Bible" && texts.bible.length > 0) { const m = findInText(primaryWord, texts.bible); if(m) crossRefs.push({text: m, source: "Bible"}); }
         if(sourceTexts[i] !== "Quran" && texts.quran.length > 0) { const m = findInText(primaryWord, texts.quran); if(m) crossRefs.push({text: m, source: "Quran"}); }
-        if(sourceTexts[i] !== "Vedas" && texts.vedas.length > 0) { const m = findInText(primaryWord, texts.vedas); if(m) crossRefs.push({text: m, source: "Vedas"}); }
+        if(sourceTexts[i] !== "Rig Veda" && texts.vedas.length > 0) { const m = findInText(primaryWord, texts.vedas); if(m) crossRefs.push({text: m, source: "Rig Veda"}); }
+        if(sourceTexts[i] !== "Buddhist Texts" && texts.buddhist.length > 0) { const m = findInText(primaryWord, texts.buddhist); if(m) crossRefs.push({text: m, source: "Buddhist Texts"}); }
+        if(sourceTexts[i] !== "Guru Granth Sahib" && texts.gurugranth.length > 0) { const m = findInText(primaryWord, texts.gurugranth); if(m) crossRefs.push({text: m, source: "Guru Granth Sahib"}); }
         
         await generateDialogue(allMatches[i], sourceTexts[i], primaryWord, crossRefs, n);
     }
     
-    await new Promise(r=>setTimeout(r, 1200));
-    appendMessage("char-moderator", `The Mystic spoke of a shared divine source, while the Skeptic warned of human manipulation. Yet, as the Universalist noted, when we look beyond the names and dogmas, the core message of "${n}" echoes across all scriptures. We are one universe expressing itself through many voices.`, "The Moderator", "moderator");
+    // === PART 1: THE KALI YUGA & BOON CONCLUSION ===
+    await new Promise(r=>setTimeout(r, 1500));
+    appendMessage("char-moderator", `We have examined 10 verses across 5 sacred traditions. We saw differences in how they express "${n}". But these are not contradictions. They are the expressions of 8 billion unique personalities across the world, each feeling divinity through their own character.`, "The Moderator", "moderator");
+
+    await new Promise(r=>setTimeout(r, 2000));
+    appendMessage("char-universal", `In this age of Kali Yuga, society tells us we are separate, and people lie to one another. But we are one religion. We are one universe, expressing itself through billions of personalities. Be the blessing. Be the Boon.`, "The Universalist", "universal");
+
+    // === PART 2: THE MEANING OF LIFE & THE STAR-FEELING ===
+    await new Promise(r=>setTimeout(r, 2500));
+    appendMessage("char-historian", `Look at the journey of a soul. A child starts on all fours, then stands as a human. What they learn is what plays out in their life. If you are a good person, the loops of karma—the bad luck—will only last a year, or three, until you understand reality and become whole again.`, "The Historian", "historian");
+
+    await new Promise(r=>setTimeout(r, 2500));
+    appendMessage("char-scholar", `Our actions in society can change our luck, but the universe always aligns us back to the One Flow. We are made of stars, and like stars, we are meant to burn bright, mimic the divine, and transform. The planet mirrors our inner state.`, "The Scientist", "scholar");
+
+    await new Promise(r=>setTimeout(r, 2500));
+    appendMessage("char-mystic", `The whole purpose here was to be religious—where every religion was One. These verses are alike and contradicting based on the one sense we were given: Feeling. Stars have feelings, and humans have feelings. We are not separate. We are one with God.`, "The Mystic", "mystic");
+
+    // === PART 3: THE FINAL REVELATION ON SOCIETY ===
+    await new Promise(r=>setTimeout(r, 2500));
+    appendMessage("char-skeptic", `But we must acknowledge the darkness. Society complies with the dark and bright sides of God, but they take it into themselves. They act and feel in ways that were never declared by any religion. They use the divine as an excuse for hatred.`, "The Atheist", "skeptic");
+
+    await new Promise(r=>setTimeout(r, 2500));
+    appendMessage("char-universal", `Yes. To be a true Boon—a Sagar of blessings—is to live here without being a hater. We must hold the light without mimicking the dark side of the world. We are here to journey out as one.`, "The Universalist", "universal");
+
     isGenerating=!1;t.disabled=!1;
 }
 
 function findInText(query, textArray) {
     if(!textArray || textArray.length === 0) return null;
-    const searchStr = query.toLowerCase();
-    for(let line of textArray) { if(line.toLowerCase().includes(searchStr)) return line; }
+    const searchRegex = new RegExp(`\\b${query}`, 'i');
+    for(let line of textArray) { 
+        if(searchRegex.test(line) && isValidLine(line)) return line; 
+    }
     return null;
 }
 
@@ -134,7 +188,6 @@ const getRand = (arr) => arr[Math.floor(Math.random() * arr.length)];
 async function generateDialogue(verse, source, word, crossRefs, userInput){
     const crossRef = crossRefs.length > 0 ? getRand(crossRefs) : null;
 
-    // Randomized Templates for each persona
     const scholarTemplates = [
         crossRef ? `It is fascinating to see this. The ${source} speaks of "${word}", and the ${crossRef.source} mirrors this concept beautifully. This points to a shared ancient archetype.` : `Looking at the ${source}, the emphasis on "${word}" is a pivotal literary device meant to anchor the audience's understanding of the divine.`,
         `The textual tradition here is rich. The use of "${word}" in this context within the ${source} echoes themes found centuries earlier in other traditions.`,
