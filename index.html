@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Universal Scripture Engine</title>
+<style>
+html,body{height:100%;margin:0;padding:0;overflow:hidden;background:#0f172a;color:#e2e8f0;font-family:sans-serif;overscroll-behavior-y:none;}
+body{display:flex;flex-direction:column;height:100dvh;}
+.header{text-align:center;padding:12px;background:#1e293b;border-bottom:2px solid #38bdf8;flex-shrink:0;}
+.header h1{margin:0;font-size:1.2rem;color:#38bdf8;font-weight:700;letter-spacing:0.5px;}
+.chat-box{flex-grow:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column;gap:10px;overscroll-behavior-y:contain;}
+.message{padding:12px 14px;border-radius:12px;max-width:90%;line-height:1.4;font-size:.95rem;box-shadow:0 2px 4px rgba(0,0,0,0.2);}
+.system-msg{background:#334155;align-self:center;font-size:.85em;text-align:center;color:#cbd5e1;border-radius:20px;padding:8px 16px;max-width:95%;}
+/* Persona Colors */
+.char-scholar{background:#1e3a8a;border-left:4px solid #3b82f6;align-self:flex-start;}
+.char-mystic{background:#4c1d95;border-left:4px solid #c084fc;align-self:flex-start;}
+.char-historian{background:#064e3b;border-left:4px solid #10b981;align-self:flex-start;}
+.char-skeptic{background:#7f1d1d;border-left:4px solid #f43f5e;align-self:flex-start;}
+.char-universal{background:#78350f;border-left:4px solid #fbbf24;align-self:flex-start;}
+.char-moderator{background:#0f172a;border:2px solid #38bdf8;align-self:center;max-width:95%;}
+.char-name{font-weight:800;font-size:.75rem;margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:0.8px;}
+.char-name.scholar{color:#93c5fd}.char-name.mystic{color:#d8b4fe}.char-name.historian{color:#6ee7b7}.char-name.skeptic{color:#fca5a5}.char-name.universal{color:#fde047}.char-name.moderator{color:#38bdf8;}
+.input-area{display:flex;gap:8px;padding:12px;background:#1e293b;border-top:1px solid #334155;flex-shrink:0;}
+input[type="text"]{flex-grow:1;padding:12px;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;outline:none;font-size:16px;}
+button.send-btn{padding:12px 20px;background:#38bdf8;color:#0f172a;font-weight:bold;border:none;border-radius:8px;}
+button.send-btn:disabled{opacity:0.5;}
+</style>
+</head>
+<body>
+<div class="header"><h1>Universal Scripture Engine</h1></div>
+<div class="chat-box" id="chatBox"><div class="message system-msg">Welcome. Enter a concept (e.g., Jesus, Mercy, Evil, Light). The engine will find 5 related verses across traditions and debate them.</div></div>
+<div class="input-area">
+<input type="text" id="userInput" placeholder="e.g., Jesus, Mercy, Evil" onkeypress="handleKeyPress(event)">
+<button class="send-btn" id="sendBtn" onclick="startDialogue()">Discuss</button>
+</div>
+<script>
+let texts = { bible: [], quran: [], vedas: [], gurugranth: [] };
+let isGenerating = false;
+const stopWords = ["the","and","that","with","they","shall","unto","your","have","this","from","will","them","were","which","their","said","what","when","there","then","into","than","upon","thou","thee","thy","for","but","not","are","was","you","all","his","her","him","she","he","be","is","it","of","to","in","a","as","at","by","or","on","those","these","who","whom","whose","been","being","have","has","had","do","does","did","doing","would","should","could","ought","i","we","you","he","she","it","they","me","us","her","him","them"];
+
+async function loadTexts(){
+    let loadedCount = 0;
+    const files = [
+        { key: 'bible', file: 'bible.txt' },
+        { key: 'quran', file: 'quran.txt' },
+        { key: 'vedas', file: 'vedas.txt' },
+        { key: 'gurugranth', file: 'gurugranth.txt' }
+    ];
+    for (let f of files) {
+        try {
+            const res = await fetch(f.file);
+            if (res.ok) {
+                texts[f.key] = (await res.text()).split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                loadedCount++;
+            }
+        } catch(e) {}
+    }
+    if (loadedCount > 0) appendMessage("system-msg", `Loaded ${loadedCount} spiritual texts successfully.`);
+    else appendMessage("system-msg", "No text files found. Please ensure bible.txt, quran.txt, etc. exist.");
+}
+
+function handleKeyPress(e){"Enter"===e.key&&!isGenerating&&startDialogue()}
+
+async function startDialogue(){
+    if(isGenerating)return;
+    const e=document.getElementById('userInput'),t=document.getElementById('sendBtn'),n=e.value.trim();
+    if(!n)return;
+    e.value="",isGenerating=!0,t.disabled=!0,appendMessage("system-msg",`Searching for "${n}"...`);
+    
+    // Collect 5 matches across ALL loaded texts
+    let allMatches = [];
+    let sourceTexts = [];
+
+    // Helper to add matches without duplicates
+    const addMatches = (textArray, sourceName) => {
+        if(!textArray || textArray.length === 0) return;
+        const searchStr = n.toLowerCase();
+        for(let line of textArray) {
+            if(line.toLowerCase().includes(searchStr) && !allMatches.includes(line)) {
+                allMatches.push(line);
+                sourceTexts.push(sourceName);
+                if(allMatches.length >= 5) return; // Stop at 5 total
+            }
+        }
+    };
+
+    addMatches(texts.bible, "Bible");
+    addMatches(texts.quran, "Quran");
+    addMatches(texts.vedas, "Vedas");
+    addMatches(texts.gurugranth, "Guru Granth Sahib");
+    
+    if(allMatches.length === 0){
+        appendMessage("system-msg",`Could not find "${n}" in any of the loaded texts.`);
+        isGenerating=!1;t.disabled=!1;return;
+    }
+    
+    appendMessage("system-msg",`Found ${allMatches.length} references. Beginning multi-verse dialogue...`);
+
+    // Process each found verse
+    for(let i=0; i<allMatches.length; i++) {
+        await new Promise(r=>setTimeout(r, 1000));
+        appendMessage("system-msg",`📖 Reference ${i+1} of ${allMatches.length} [${sourceTexts[i]}]: ${allMatches[i]}`);
+        
+        // Extract keywords
+        const cleanText = allMatches[i].replace(/^[1-3]?\s*[a-zA-Z]+\s+\d+:\d+\s*/i, '').trim();
+        const words = cleanText.match(/[a-zA-Z]{4,}/g) || [];
+        const keywords = words.filter(w => !stopWords.includes(w.toLowerCase()));
+        const primaryWord = keywords.length > 0 ? keywords[0].toLowerCase() : n;
+        
+        // Find cross references
+        let crossRefs = [];
+        if(sourceTexts[i] !== "Bible" && texts.bible.length > 0) { const m = findInText(primaryWord, texts.bible); if(m) crossRefs.push({text: m, source: "Bible"}); }
+        if(sourceTexts[i] !== "Quran" && texts.quran.length > 0) { const m = findInText(primaryWord, texts.quran); if(m) crossRefs.push({text: m, source: "Quran"}); }
+        if(sourceTexts[i] !== "Vedas" && texts.vedas.length > 0) { const m = findInText(primaryWord, texts.vedas); if(m) crossRefs.push({text: m, source: "Vedas"}); }
+        
+        await generateDialogue(allMatches[i], sourceTexts[i], primaryWord, crossRefs, n);
+    }
+    
+    await new Promise(r=>setTimeout(r, 1200));
+    appendMessage("char-moderator", `The Mystic spoke of a shared divine source, while the Skeptic warned of human manipulation. Yet, as the Universalist noted, when we look beyond the names and dogmas, the core message of "${n}" echoes across all scriptures. We are one universe expressing itself through many voices.`, "The Moderator", "moderator");
+    isGenerating=!1;t.disabled=!1;
+}
+
+function findInText(query, textArray) {
+    if(!textArray || textArray.length === 0) return null;
+    const searchStr = query.toLowerCase();
+    for(let line of textArray) { if(line.toLowerCase().includes(searchStr)) return line; }
+    return null;
+}
+
+const getRand = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+async function generateDialogue(verse, source, word, crossRefs, userInput){
+    const crossRef = crossRefs.length > 0 ? getRand(crossRefs) : null;
+
+    // Randomized Templates for each persona
+    const scholarTemplates = [
+        crossRef ? `It is fascinating to see this. The ${source} speaks of "${word}", and the ${crossRef.source} mirrors this concept beautifully. This points to a shared ancient archetype.` : `Looking at the ${source}, the emphasis on "${word}" is a pivotal literary device meant to anchor the audience's understanding of the divine.`,
+        `The textual tradition here is rich. The use of "${word}" in this context within the ${source} echoes themes found centuries earlier in other traditions.`,
+        `If we trace the etymology of "${word}" back, we find a deeply rooted concept of the sacred that transcends the specific language of the ${source}.`
+    ];
+
+    const mysticTemplates = [
+        `Words are just fingers pointing at the moon. Whether we read "${word}" in the ${source} or elsewhere, the true experience of the divine transcends human language. It is felt, not debated.`,
+        `The true meaning of "${word}" cannot be contained in a book. The ${source} is a map, but we must walk the territory ourselves to understand its depth.`,
+        `When I read about "${userInput}", I don't see a doctrine to argue over. I see a call to dissolve the ego and merge with the infinite light that the ${source} describes.`
+    ];
+
+    const historianTemplates = [
+        `Why do people divide over these texts? Because empires and kings used them to control populations. The true history shows that early followers of these traditions were deeply intertwined.`,
+        `The political climate when the ${source} was written is crucial. The term "${word}" wasn't just spiritual; it was a direct challenge to the dominant empires of that era.`,
+        `History reveals that the rigid boundaries between religions today didn't exist in the ancient world. The ${source} was part of a melting pot of spiritual ideas.`
+    ];
+
+    const skepticTemplates = [
+        `I appreciate the poetic view, but let's be realistic. Humans wrote these texts centuries apart. We are finding parallels because our brains are wired to find patterns.`,
+        `It's easy to read "${word}" and feel a sense of unity, but the ${source} has been used to justify terrible atrocities. We can't ignore the dark side of these texts.`,
+        `The exclusivity in religions was invented by humans to create "us vs. them". Claiming all paths lead to the same truth diminishes the unique, often contradictory claims of the ${source}.`
+    ];
+
+    const universalTemplates = [
+        `The Skeptic is right that humans invented the walls, but the foundation is real. If we truly belong to this universe, then every scripture is a different window looking into the same room.`,
+        `The concept of "${word}" in the ${source} is a reflection of our shared human longing for meaning. Every tradition is a different language trying to describe the same indescribable source.`,
+        `We are one universe expressing itself through many voices. When we hear "${userInput}" in the ${source}, we should hear the heartbeat of all humanity, not just one tribe.`
+    ];
+
+    const speakers = [
+        { name: "The Comparative Scholar", class: "char-scholar", title: "scholar", text: getRand(scholarTemplates) },
+        { name: "The Mystic", class: "char-mystic", title: "mystic", text: getRand(mysticTemplates) },
+        { name: "The Historian", class: "char-historian", title: "historian", text: getRand(historianTemplates) },
+        { name: "The Skeptic", class: "char-skeptic", title: "skeptic", text: getRand(skepticTemplates) },
+        { name: "The Universalist", class: "char-universal", title: "universal", text: getRand(universalTemplates) }
+    ];
+
+    for(let i=0; i<speakers.length; i++){
+        const randomDelay = Math.floor(Math.random() * 600) + 600; 
+        await new Promise(r=>setTimeout(r, randomDelay));
+        appendMessage(speakers[i].class, speakers[i].text, speakers[i].name, speakers[i].title);
+    }
+}
+
+function appendMessage(e,t,n=null,s=""){
+    const i=document.getElementById('chatBox'),a=document.createElement('div');
+    a.className=`message ${e}`;
+    if(n){const e=document.createElement('span');e.className=`char-name ${s}`,e.innerText=n,a.appendChild(e)}
+    a.appendChild(document.createTextNode(t)),i.appendChild(a),i.scrollTop=i.scrollHeight
+}
+window.onload=loadTexts;
+</script>
+</body>
+</html>
