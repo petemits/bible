@@ -72,6 +72,21 @@ body {
     line-height: 1.6;
     font-style: italic;
 }
+/* Style for the Read Full Text Button */
+.read-full-btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 6px 12px;
+    background: #3b82f6;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: bold;
+    font-style: normal;
+}
+.read-full-btn:hover { background: #2563eb; }
+
 /* Persona Colors */
 .char-scholar{background:#1e3a8a;border-left:4px solid #3b82f6;align-self:flex-start;}
 .char-mystic{background:#4c1d95;border-left:4px solid #c084fc;align-self:flex-start;}
@@ -123,7 +138,7 @@ button.send-btn:disabled{opacity:0.5;}
 <button class="send-btn" id="sendBtn" onclick="startDialogue()">Discuss</button>
 </div>
 <script>
-let texts = { bible: [], quran: [], vedas: [], buddhist: [], gurugranth: [] };
+let texts = { bible: [], quran: [], vedas: [], buddhist: [], gurugranth: [], judaism: [], nature_way: [] };
 let isGenerating = false;
 const stopWords = ["the","and","that","with","they","shall","unto","your","have","this","from","will","them","were","which","their","said","what","when","there","then","into","than","upon","thou","thee","thy","for","but","not","are","was","you","all","his","her","him","she","he","be","is","it","of","to","in","a","as","at","by","or","on","those","these","who","whom","whose","been","being","have","has","had","do","does","did","doing","would","should","could","ought","i","we","you","he","she","it","they","me","us","her","him","them"];
 
@@ -134,7 +149,9 @@ async function loadTexts(){
         { key: 'quran', file: 'quran.txt' },
         { key: 'vedas', file: 'vedas.txt' },
         { key: 'buddhist', file: 'buddhist.txt' },
-        { key: 'gurugranth', file: 'gurugranth.txt' }
+        { key: 'gurugranth', file: 'gurugranth.txt' },
+        { key: 'judaism', file: 'judaism.txt' },
+        { key: 'nature_way', file: 'nature_way.txt' }
     ];
     for (let f of files) {
         try {
@@ -150,12 +167,12 @@ async function loadTexts(){
 function handleKeyPress(e){"Enter"===e.key&&!isGenerating&&startDialogue()}
 
 function isValidLine(line) {
-    if (line.length < 15) return false; 
+    if (line.length < 10) return false; 
     if (line.includes("_") || line.includes(": —")) return false; 
-    if (/[\u4e00-\u9fa5]/.test(line)) return false; 
+    if (line.split(' ').length < 2) return false; 
     if (!/[a-zA-Z]/.test(line)) return false;
     const lower = line.toLowerCase();
-    const badWords = ["gutenberg", "preface", "contents", "copyright", "translator", "editor", "project", "ebook", "footnote", "page ", "reader", "inaccessible", "introduction"];
+    const badWords = ["gutenberg", "preface", "contents", "copyright", "translator", "editor", "project", "ebook", "footnote", "reader", "inaccessible", "introduction"];
     if (badWords.some(w => lower.includes(w))) return false;
     return true;
 }
@@ -166,7 +183,7 @@ async function startDialogue(){
     if(!n)return;
     e.value="",isGenerating=!0,t.disabled=!0;
     document.getElementById('chatBox').innerHTML = '';
-    appendMessage("system-msg",`Searching all 5 traditions for "${n}"...`);
+    appendMessage("system-msg",`Searching all 7 traditions for "${n}"...`);
     
     let allMatches = [];
     let sourceTexts = [];
@@ -196,11 +213,14 @@ async function startDialogue(){
         }
     };
 
-    addMatches(texts.bible, "Bible", 2);
-    addMatches(texts.quran, "Quran", 2);
-    addMatches(texts.vedas, "Rig Veda", 2);
-    addMatches(texts.buddhist, "Buddhist Texts", 2);
-    addMatches(texts.gurugranth, "Guru Granth Sahib", 2);
+    // Changed to pull 1 reference per tradition so the chat doesn't take 10 minutes to read
+    addMatches(texts.bible, "Bible", 1);
+    addMatches(texts.quran, "Quran", 1);
+    addMatches(texts.vedas, "Rig Veda", 1);
+    addMatches(texts.buddhist, "Buddhist Texts", 1);
+    addMatches(texts.gurugranth, "Guru Granth Sahib", 1);
+    addMatches(texts.judaism, "Judaism", 1);
+    addMatches(texts.nature_way, "Nature & The Way", 1);
     
     if(allMatches.length === 0){
         appendMessage("system-msg",`Could not find matches or load text files.`);
@@ -209,6 +229,18 @@ async function startDialogue(){
     
     appendMessage("system-msg",`Found ${allMatches.length} references across traditions. Analyzing verses...`);
 
+    // Helper to map the text to the correct GitHub file
+    const getFileName = (source) => {
+        if(source.includes("Bible")) return "bible.txt";
+        if(source.includes("Quran")) return "quran.txt";
+        if(source.includes("Veda")) return "vedas.txt";
+        if(source.includes("Buddhist")) return "buddhist.txt";
+        if(source.includes("Granth")) return "gurugranth.txt";
+        if(source.includes("Judaism")) return "judaism.txt";
+        if(source.includes("Nature")) return "nature_way.txt";
+        return "#";
+    };
+
     for(let i=0; i<allMatches.length; i++) {
         await new Promise(r=>setTimeout(r, 1000));
         
@@ -216,10 +248,15 @@ async function startDialogue(){
         const words = cleanText.match(/[a-zA-Z]{4,}/g) || [];
         const keywords = words.filter(w => !stopWords.includes(w.toLowerCase()));
         const primaryWord = keywords.length > 0 ? keywords[0].toLowerCase() : n;
+
+        // Make the Read Full Text button
+        const fileName = getFileName(sourceTexts[i]);
+        const readFullLink = `<br><br><a href="${fileName}" target="_blank" class="read-full-btn">📖 Read Full ${sourceTexts[i]} Text</a>`;
         
         appendMessage("verse-analysis", `<strong>Scriptural Asset [${sourceTexts[i]}]:</strong> "${allMatches[i]}"<br><br>
         <strong>The Message:</strong> This verse is trying to relay a deep truth about "${primaryWord}" and our place in the revolving chain of existence. Humans are God's wish, meant to live in harmony as the Earth revolves around the sun. <br><br>
-        <strong>The Human Failure:</strong> Yet, humanity fails this message. We kill each other for money, greed, and power. When we cannot conquer our equals, we attack the species and people below us in the hierarchy. This is the predatory system we see in corporate jobs, in immigration, and in society.`);
+        <strong>The Human Failure:</strong> Yet, humanity fails this message. We kill each other for money, greed, and power. When we cannot conquer our equals, we attack the species and people below us in the hierarchy. This is the predatory system we see in corporate jobs, in immigration, and in society.
+        ${readFullLink}`);
 
         await generateDynamicDialogue(cleanText, sourceTexts[i], primaryWord, n);
     }
@@ -246,21 +283,21 @@ async function startDialogue(){
     await new Promise(r=>setTimeout(r, 2500));
     appendMessage("char-universal", `Yes. We are at a level of a dark ship where you can see the light, but in your heart, it remains gloomy. Whether you are the Prime Minister, the CEO, or a child born on all fours, the divine light is within you. The universe is one flow. Be the Boon.`, "The Universalist", "universal");
 
-    // === THE FINAL REVELATION: SURVIVAL, BLINDFOLDS, AND HUMAN EVIL ===
+    // === THE FINAL REVELATION ===
     await new Promise(r=>setTimeout(r, 3500));
     appendMessage("char-moderator", `<strong>THE FINAL REVELATION: THE PURPOSE OF SURVIVAL</strong><br><br>
     What is the purpose of survival? Is our last battle a war, or a living recognition of community and love? We are from God, and God is from us. We are not different.<br><br>
     I find that the real evil is within us. If a squirrel can walk up to a tree, does it mean they are unconscious because they can't fight with you? People keep pets, but when we kill our own pets, does that mean you kill yourself because you're not full to the grant? Or is it just because you are evil as a human?<br><br>
     Look at the races. Black people think they just have to be black, carrying hate and diminishing each other. Brown people think everything is a lie. White people think it's okay to raise a person and then kill them, take their property—just as corporations do to everybody. We are blindfolded in ourselves, just as Lady Justice is blindfolded. You might think it's on purpose to power trip people or trick the universe or God, but that's not the case.`, "The Final Revelation", "moderator");
 
-    // === THE ULTIMATE TRUTH: THE 2% ILLUSION AND COSMIC LOVE ===
+    // === THE ULTIMATE TRUTH ===
     await new Promise(r=>setTimeout(r, 3500));
     appendMessage("char-moderator", `<strong>THE ULTIMATE TRUTH: THE 2% ILLUSION</strong><br><br>
     I believe we all have powers of gods to begin with. The world states we live using only 2% of our total recollection of God. That means we have all the powers. But the system has changed. It only tries to show that humans are nothing, life is nothing, this world is nothing. We just have to kill each other, hate each other, discriminate, and amplify whatever they did wrong.<br><br>
     In the very first century of the humanistic level, nobody saw the races we see today. The snake didn't kill a bird, the bird didn't attack a lion, the lion didn't kill a human just to hate. It wasn't like that. We are here to love. But if you are given a manifesto of hate, then you are going to hate.<br><br>
     That is what has happened over the centuries. In the 21st century, humans have become so distant that they don't even see themselves anymore. They see themselves as darkness, as no one. We must remember: we are here to love, not to serve a manifesto of hate.`, "The Ultimate Truth", "moderator");
 
-    // === THE FINAL THOUGHT: THE 9TH STAR AND GOD'S LAW ===
+    // === THE FINAL THOUGHT ===
     await new Promise(r=>setTimeout(r, 3500));
     appendMessage("char-moderator", `<strong>THE FINAL THOUGHT: THE NINTH STAR</strong><br><br>
     Humans have become like the ninth star in that cosmic hierarchy. Earth is just a planet in cosmic relations. Yet humans have changed the whole aspect because of bad faith, different racial understandings, and the pressures of power mongers, money mongers, and titles playing out in society.<br><br>
@@ -268,7 +305,7 @@ async function startDialogue(){
     <strong>What is the purpose of living then?</strong><br><br>
     We came to live together. That is why we are given One, so you could combine yourself and be One. Yet you are trying to further divide the One into different species. I don't understand. That is not God's law, man.`, "The Final Thought", "moderator");
 
-    // === THE FINAL VERDICT: BLAME, KARMIC CYCLES, AND REINCARNATION ===
+    // === THE FINAL VERDICT ===
     await new Promise(r=>setTimeout(r, 3500));
     appendMessage("char-moderator", `<strong>THE FINAL VERDICT: KARMIC CYCLES AND REINCARNATION</strong><br><br>
     When a bad thing happens to a human in their life, they tend to blame the world and God, not realizing that it is their own fault and actions. Mind you, actions revolve from year to year. In one year, whatever an infant does, it repeats in a different manner at two years, three years, up until the age you die.<br><br>
@@ -278,7 +315,6 @@ async function startDialogue(){
     isGenerating=!1;t.disabled=!1;
 }
 
-// DYNAMIC DIALOGUE GENERATOR
 async function generateDynamicDialogue(verseSnippet, source, primaryWord, userInput){
     const shortVerse = verseSnippet.length > 60 ? verseSnippet.substring(0, 60) + "..." : verseSnippet;
 
