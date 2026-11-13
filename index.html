@@ -5,22 +5,104 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Universal Scripture Engine</title>
 <style>
-html,body{height:100%;margin:0;padding:0;overflow:hidden;background:#0f172a;color:#e2e8f0;font-family:sans-serif;overscroll-behavior-y:none;}
-body{display:flex;flex-direction:column;height:100dvh;}
-.header{text-align:center;padding:12px;background:#1e293b;border-bottom:2px solid #38bdf8;flex-shrink:0;}
-.header h1{margin:0;font-size:1.2rem;color:#38bdf8;font-weight:700;letter-spacing:0.5px;}
-.chat-box{flex-grow:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column;gap:10px;overscroll-behavior-y:contain;}
-.message{padding:12px 14px;border-radius:12px;max-width:90%;line-height:1.4;font-size:.95rem;box-shadow:0 2px 4px rgba(0,0,0,0.2);}
-.system-msg{background:#334155;align-self:center;font-size:.85em;text-align:center;color:#cbd5e1;border-radius:20px;padding:8px 16px;max-width:95%;line-height:1.6;}
+html, body {
+    margin: 0;
+    padding: 0;
+    background: #0f172a;
+    color: #e2e8f0;
+    font-family: sans-serif;
+    min-height: 100vh;
+}
+body {
+    display: flex;
+    flex-direction: column;
+}
+.header {
+    text-align: center;
+    padding: 12px;
+    background: #1e293b;
+    border-bottom: 2px solid #38bdf8;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+.header h1 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #38bdf8;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+.chat-box {
+    flex-grow: 1;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: 80px; 
+}
+.message {
+    padding: 12px 14px;
+    border-radius: 12px;
+    max-width: 90%;
+    line-height: 1.5;
+    font-size: .95rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.system-msg {
+    background: #334155;
+    align-self: center;
+    font-size: .85em;
+    text-align: center;
+    color: #cbd5e1;
+    border-radius: 20px;
+    padding: 8px 16px;
+    max-width: 95%;
+    line-height: 1.6;
+}
+.verse-analysis {
+    background: #1e3a8a;
+    border: 2px solid #60a5fa;
+    align-self: center;
+    font-size: .9em;
+    color: #bfdbfe;
+    border-radius: 12px;
+    padding: 15px;
+    max-width: 95%;
+    line-height: 1.6;
+    font-style: italic;
+}
+/* Persona Colors */
 .char-scholar{background:#1e3a8a;border-left:4px solid #3b82f6;align-self:flex-start;}
 .char-mystic{background:#4c1d95;border-left:4px solid #c084fc;align-self:flex-start;}
 .char-historian{background:#064e3b;border-left:4px solid #10b981;align-self:flex-start;}
 .char-skeptic{background:#7f1d1d;border-left:4px solid #f43f5e;align-self:flex-start;}
 .char-universal{background:#78350f;border-left:4px solid #fbbf24;align-self:flex-start;}
+.char-ceo{background:#111827;border-left:4px solid #e5e7eb;align-self:flex-start;color:#e5e7eb;}
+.char-worker{background:#7c2d12;border-left:4px solid #fb923c;align-self:flex-start;}
+.char-admin{background:#1e293b;border-left:4px solid #94a3b8;align-self:flex-start;}
+.char-artist{background:#831843;border-left:4px solid #f472b6;align-self:flex-start;}
+.char-nature{background:#14532d;border-left:4px solid #4ade80;align-self:flex-start;}
+.char-cosmos{background:#312e81;border-left:4px solid #818cf8;align-self:flex-start;}
 .char-moderator{background:#0f172a;border:2px solid #38bdf8;align-self:center;max-width:95%;}
+
 .char-name{font-weight:800;font-size:.75rem;margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:0.8px;}
-.char-name.scholar{color:#93c5fd}.char-name.mystic{color:#d8b4fe}.char-name.historian{color:#6ee7b7}.char-name.skeptic{color:#fca5a5}.char-name.universal{color:#fde047}.char-name.moderator{color:#38bdf8;}
-.input-area{display:flex;gap:8px;padding:12px;background:#1e293b;border-top:1px solid #334155;flex-shrink:0;}
+.char-name.scholar{color:#93c5fd}.char-name.mystic{color:#d8b4fe}.char-name.historian{color:#6ee7b7}.char-name.skeptic{color:#fca5a5}.char-name.universal{color:#fde047}
+.char-name.ceo{color:#f3f4f6}.char-name.worker{color:#fdba74}.char-name.admin{color:#cbd5e1}.char-name.artist{color:#fbcfe8}
+.char-name.nature{color:#86efac}.char-name.cosmos{color:#a5b4fc}
+.char-name.moderator{color:#38bdf8;}
+.input-area {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    background: #1e293b;
+    border-top: 1px solid #334155;
+    box-sizing: border-box;
+}
 input[type="text"]{flex-grow:1;padding:12px;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#fff;outline:none;font-size:16px;}
 button.send-btn{padding:12px 20px;background:#38bdf8;color:#0f172a;font-weight:bold;border:none;border-radius:8px;}
 button.send-btn:disabled{opacity:0.5;}
@@ -29,16 +111,15 @@ button.send-btn:disabled{opacity:0.5;}
 <body>
 <div class="header"><h1>Universal Scripture Engine</h1></div>
 <div class="chat-box" id="chatBox">
-    <!-- THE PERMANENT WELCOME & PURPOSE BANNER -->
     <div class="message system-msg">
-        <strong>The Journey & The Purpose</strong><br><br>
-        We are here to journey ourselves out, as we are one with God in alignment. The planet mirrors us, and our presence is to pronounce that it is all one flow. We transform, gaining awareness after birth—starting as a four-legged child, turning into a human. Our actions can change our luck, but if you are a good person, the loop of karma only lasts until you understand reality and become whole again.<br><br>
-        <em><strong>The Purpose of this Engine:</strong> I am a Boon (a Sagar of blessings), not a hater. I wish for all to live here, yet society complies with the dark and bright sides of God—acting and feeling in ways that were never declared by any religion. Every religion was One. The verses here are alike and contradicting based on the one sense we were given: feeling.</em><br><br>
-        Enter a concept (e.g., Truth, Light, Peace) to begin.
+        <strong>The Cosmic Flow & The Internal War</strong><br><br>
+        We are all part of the same flow. Yet, human society builds a rigid hierarchy that ignores this truth. The real war is within: our feelings shift, and our primary motives change. We see saints become goons, and goons become saints. We face worldly systems and unforeseeable nature. The problem is the shift from good ship to bad ship. It affects us as one social society because we are never separate. We only think we are separated because that is what we see.<br><br>
+        <em><strong>The Purpose:</strong> I am a Boon (a Sagar of blessings), not a hater. I wish for all to live here. There is no darkness in the universe; it is always lit by stars or sun. The whole purpose is to be religious—where every religion was One.</em><br><br>
+        Enter a concept (e.g., God, Love, Hate, Peace) to see how the scripture is analyzed, and how humanity fails its message through systemic greed and predatory hierarchy.
     </div>
 </div>
 <div class="input-area">
-<input type="text" id="userInput" placeholder="e.g., Truth, Light, Peace" onkeypress="handleKeyPress(event)">
+<input type="text" id="userInput" placeholder="e.g., God, Love, Hate, Peace" onkeypress="handleKeyPress(event)">
 <button class="send-btn" id="sendBtn" onclick="startDialogue()">Discuss</button>
 </div>
 <script>
@@ -84,7 +165,7 @@ async function startDialogue(){
     const e=document.getElementById('userInput'),t=document.getElementById('sendBtn'),n=e.value.trim();
     if(!n)return;
     e.value="",isGenerating=!0,t.disabled=!0;
-    document.getElementById('chatBox').innerHTML = ''; // Clear the welcome banner when dialogue starts
+    document.getElementById('chatBox').innerHTML = '';
     appendMessage("system-msg",`Searching all 5 traditions for "${n}"...`);
     
     let allMatches = [];
@@ -126,118 +207,189 @@ async function startDialogue(){
         isGenerating=!1;t.disabled=!1;return;
     }
     
-    appendMessage("system-msg",`Found ${allMatches.length} references across traditions. Beginning dialogue...`);
+    appendMessage("system-msg",`Found ${allMatches.length} references across traditions. Analyzing verses...`);
 
     for(let i=0; i<allMatches.length; i++) {
         await new Promise(r=>setTimeout(r, 1000));
-        appendMessage("system-msg",`📖 Reference ${i+1} of ${allMatches.length} [${sourceTexts[i]}]: ${allMatches[i]}`);
         
         const cleanText = allMatches[i].replace(/^[1-3]?\s*[a-zA-Z]+\s+\d+:\d+\s*/i, '').trim();
         const words = cleanText.match(/[a-zA-Z]{4,}/g) || [];
         const keywords = words.filter(w => !stopWords.includes(w.toLowerCase()));
         const primaryWord = keywords.length > 0 ? keywords[0].toLowerCase() : n;
         
-        let crossRefs = [];
-        if(sourceTexts[i] !== "Bible" && texts.bible.length > 0) { const m = findInText(primaryWord, texts.bible); if(m) crossRefs.push({text: m, source: "Bible"}); }
-        if(sourceTexts[i] !== "Quran" && texts.quran.length > 0) { const m = findInText(primaryWord, texts.quran); if(m) crossRefs.push({text: m, source: "Quran"}); }
-        if(sourceTexts[i] !== "Rig Veda" && texts.vedas.length > 0) { const m = findInText(primaryWord, texts.vedas); if(m) crossRefs.push({text: m, source: "Rig Veda"}); }
-        if(sourceTexts[i] !== "Buddhist Texts" && texts.buddhist.length > 0) { const m = findInText(primaryWord, texts.buddhist); if(m) crossRefs.push({text: m, source: "Buddhist Texts"}); }
-        if(sourceTexts[i] !== "Guru Granth Sahib" && texts.gurugranth.length > 0) { const m = findInText(primaryWord, texts.gurugranth); if(m) crossRefs.push({text: m, source: "Guru Granth Sahib"}); }
-        
-        await generateDialogue(allMatches[i], sourceTexts[i], primaryWord, crossRefs, n);
+        appendMessage("verse-analysis", `<strong>Scriptural Asset [${sourceTexts[i]}]:</strong> "${allMatches[i]}"<br><br>
+        <strong>The Message:</strong> This verse is trying to relay a deep truth about "${primaryWord}" and our place in the revolving chain of existence. Humans are God's wish, meant to live in harmony as the Earth revolves around the sun. <br><br>
+        <strong>The Human Failure:</strong> Yet, humanity fails this message. We kill each other for money, greed, and power. When we cannot conquer our equals, we attack the species and people below us in the hierarchy. This is the predatory system we see in corporate jobs, in immigration, and in society.`);
+
+        await generateDynamicDialogue(cleanText, sourceTexts[i], primaryWord, n);
     }
     
-    // === PART 1: THE KALI YUGA & BOON CONCLUSION ===
+    // === THE GRAND FINALE ===
     await new Promise(r=>setTimeout(r, 1500));
-    appendMessage("char-moderator", `We have examined 10 verses across 5 sacred traditions. We saw differences in how they express "${n}". But these are not contradictions. They are the expressions of 8 billion unique personalities across the world, each feeling divinity through their own character.`, "The Moderator", "moderator");
+    appendMessage("char-moderator", `We have examined the verses and heard from every facet of human society. Let us look at the realism of our world.`, "The Moderator", "moderator");
 
     await new Promise(r=>setTimeout(r, 2000));
-    appendMessage("char-universal", `In this age of Kali Yuga, society tells us we are separate, and people lie to one another. But we are one religion. We are one universe, expressing itself through billions of personalities. Be the blessing. Be the Boon.`, "The Universalist", "universal");
+    appendMessage("char-ceo", `In my position, I have to look at the bottom line. The system dictates that I make hard choices. I have all the money, but I am losing my character. I am told to treat people differently, to choose darkness to protect the company.`, "The CEO", "ceo");
 
-    // === PART 2: THE MEANING OF LIFE & THE STAR-FEELING ===
-    await new Promise(r=>setTimeout(r, 2500));
-    appendMessage("char-historian", `Look at the journey of a soul. A child starts on all fours, then stands as a human. What they learn is what plays out in their life. If you are a good person, the loops of karma—the bad luck—will only last a year, or three, until you understand reality and become whole again.`, "The Historian", "historian");
+    await new Promise(r=>setTimeout(r, 2000));
+    appendMessage("char-worker", `I came to Canada from India. I have worked for 30 years and done over 50 odd jobs. Every time, after 9 months or a year, they try to kick me out. You can feel it—they don't want you there. The system is built to keep you down.`, "The Veteran Immigrant Worker", "worker");
 
-    await new Promise(r=>setTimeout(r, 2500));
-    appendMessage("char-scholar", `Our actions in society can change our luck, but the universe always aligns us back to the One Flow. We are made of stars, and like stars, we are meant to burn bright, mimic the divine, and transform. The planet mirrors our inner state.`, "The Scientist", "scholar");
+    await new Promise(r=>setTimeout(r, 2000));
+    appendMessage("char-nature", `Humans forget they are part of this world. The trees do not hoard sunlight. Nature survives only through mutual giving, not hierarchy. You would not have survived without this connection.`, "Nature & The Trees", "nature");
 
-    await new Promise(r=>setTimeout(r, 2500));
-    appendMessage("char-mystic", `The whole purpose here was to be religious—where every religion was One. These verses are alike and contradicting based on the one sense we were given: Feeling. Stars have feelings, and humans have feelings. We are not separate. We are one with God.`, "The Mystic", "mystic");
+    await new Promise(r=>setTimeout(r, 2000));
+    appendMessage("char-cosmos", `You are part of the starship outside the world, but trapped inside it. We are all made of the same cosmic flow. Your life is harder because you create artificial divisions.`, "The Cosmos", "cosmos");
 
-    // === PART 3: THE FINAL REVELATION ON SOCIETY ===
-    await new Promise(r=>setTimeout(r, 2500));
-    appendMessage("char-skeptic", `But we must acknowledge the darkness. Society complies with the dark and bright sides of God, but they take it into themselves. They act and feel in ways that were never declared by any religion. They use the divine as an excuse for hatred.`, "The Atheist", "skeptic");
+    await new Promise(r=>setTimeout(r, 2000));
+    appendMessage("char-mystic", `Because in truth, there is no darkness in the universe. It is always lit up by the sun, the moon, the stars. The light is always there, we just cover our eyes with titles and hierarchies.`, "The Mystic", "mystic");
 
     await new Promise(r=>setTimeout(r, 2500));
-    appendMessage("char-universal", `Yes. To be a true Boon—a Sagar of blessings—is to live here without being a hater. We must hold the light without mimicking the dark side of the world. We are here to journey out as one.`, "The Universalist", "universal");
+    appendMessage("char-universal", `Yes. We are at a level of a dark ship where you can see the light, but in your heart, it remains gloomy. Whether you are the Prime Minister, the CEO, or a child born on all fours, the divine light is within you. The universe is one flow. Be the Boon.`, "The Universalist", "universal");
+
+    // === THE FINAL REVELATION: SURVIVAL, BLINDFOLDS, AND HUMAN EVIL ===
+    await new Promise(r=>setTimeout(r, 3500));
+    appendMessage("char-moderator", `<strong>THE FINAL REVELATION: THE PURPOSE OF SURVIVAL</strong><br><br>
+    What is the purpose of survival? Is our last battle a war, or a living recognition of community and love? We are from God, and God is from us. We are not different.<br><br>
+    I find that the real evil is within us. If a squirrel can walk up to a tree, does it mean they are unconscious because they can't fight with you? People keep pets, but when we kill our own pets, does that mean you kill yourself because you're not full to the grant? Or is it just because you are evil as a human?<br><br>
+    Look at the races. Black people think they just have to be black, carrying hate and diminishing each other. Brown people think everything is a lie. White people think it's okay to raise a person and then kill them, take their property—just as corporations do to everybody. We are blindfolded in ourselves, just as Lady Justice is blindfolded. You might think it's on purpose to power trip people or trick the universe or God, but that's not the case.`, "The Final Revelation", "moderator");
+
+    // === THE ULTIMATE TRUTH: THE 2% ILLUSION AND COSMIC LOVE ===
+    await new Promise(r=>setTimeout(r, 3500));
+    appendMessage("char-moderator", `<strong>THE ULTIMATE TRUTH: THE 2% ILLUSION</strong><br><br>
+    I believe we all have powers of gods to begin with. The world states we live using only 2% of our total recollection of God. That means we have all the powers. But the system has changed. It only tries to show that humans are nothing, life is nothing, this world is nothing. We just have to kill each other, hate each other, discriminate, and amplify whatever they did wrong.<br><br>
+    In the very first century of the humanistic level, nobody saw the races we see today. The snake didn't kill a bird, the bird didn't attack a lion, the lion didn't kill a human just to hate. It wasn't like that. We are here to love. But if you are given a manifesto of hate, then you are going to hate.<br><br>
+    That is what has happened over the centuries. In the 21st century, humans have become so distant that they don't even see themselves anymore. They see themselves as darkness, as no one. We must remember: we are here to love, not to serve a manifesto of hate.`, "The Ultimate Truth", "moderator");
+
+    // === THE FINAL THOUGHT: THE 9TH STAR AND GOD'S LAW ===
+    await new Promise(r=>setTimeout(r, 3500));
+    appendMessage("char-moderator", `<strong>THE FINAL THOUGHT: THE NINTH STAR</strong><br><br>
+    Humans have become like the ninth star in that cosmic hierarchy. Earth is just a planet in cosmic relations. Yet humans have changed the whole aspect because of bad faith, different racial understandings, and the pressures of power mongers, money mongers, and titles playing out in society.<br><br>
+    We are all changing into criminals. We don't trust each other. We don't love each other. We don't care about each other.<br><br>
+    <strong>What is the purpose of living then?</strong><br><br>
+    We came to live together. That is why we are given One, so you could combine yourself and be One. Yet you are trying to further divide the One into different species. I don't understand. That is not God's law, man.`, "The Final Thought", "moderator");
+
+    // === THE FINAL VERDICT: BLAME, KARMIC CYCLES, AND REINCARNATION ===
+    await new Promise(r=>setTimeout(r, 3500));
+    appendMessage("char-moderator", `<strong>THE FINAL VERDICT: KARMIC CYCLES AND REINCARNATION</strong><br><br>
+    When a bad thing happens to a human in their life, they tend to blame the world and God, not realizing that it is their own fault and actions. Mind you, actions revolve from year to year. In one year, whatever an infant does, it repeats in a different manner at two years, three years, up until the age you die.<br><br>
+    As I said, a good person becomes bad and a bad person becomes good at certain points of their realization. But certain people are adamant about their own scriptures, not realizing what other scriptures are saying so they could make up their mind. They don't do that. They just try to blame and claim and blame, until the living being commits suicide or gives up. Then, they have to reincarnate into a different species.<br><br>
+    I believe in reincarnation into different species only when you didn't do your righteous job as a human. Because humans have the most quantified intelligence than any other species. Yet, they can't walk a tree, they can't fly, they can't walk among the stars. But we all have that identification. It's just that we took this form so we could exploit that form in the living system created by this manhood. Do not waste it on blame.`, "The Final Verdict", "moderator");
 
     isGenerating=!1;t.disabled=!1;
 }
 
-function findInText(query, textArray) {
-    if(!textArray || textArray.length === 0) return null;
-    const searchRegex = new RegExp(`\\b${query}`, 'i');
-    for(let line of textArray) { 
-        if(searchRegex.test(line) && isValidLine(line)) return line; 
+// DYNAMIC DIALOGUE GENERATOR
+async function generateDynamicDialogue(verseSnippet, source, primaryWord, userInput){
+    const shortVerse = verseSnippet.length > 60 ? verseSnippet.substring(0, 60) + "..." : verseSnippet;
+
+    const philosophicalCore = [
+        `We are attacked by our hierarchical fears. Yet when people come home to their families, they find a sense of light. But the real war is within. Our motives shift. We shift from good ship to bad ship. We are never separate.`,
+        `After all the despair, the light is in our relations. But we are keen to disclaim others, chasing the predatory segment. The war here is within. We become saints from goons. It affects us as one social society.`,
+        `Do you think it's real to give somebody misery, and then offer them peace to cut that misery? The problem is the shift within. We shift from a good ship to a bad ship. We are never separate.`,
+        `The real war is within. We are up and down at all times. We shift from saint to goon. We only think we are separated because of what we see, but the cosmic evidence shows we are one.`
+    ];
+
+    const getCore = () => getRand(philosophicalCore);
+
+    const personas = [
+        {
+            name: "The Comparative Scholar", class: "char-scholar", title: "scholar",
+            templates: [
+                `I spent 10 years studying the texts. Today, in the library, I read "${shortVerse}" from the ${source}. It struck me that we dissect the word "${primaryWord}" but miss the feeling. ${getCore()}`,
+                `My colleague was fired yesterday. I opened the ${source} and read "${shortVerse}". It made me question everything. We chase the predatory segment in academia. ${getCore()}`
+            ]
+        },
+        {
+            name: "The Mystic", class: "char-mystic", title: "mystic",
+            templates: [
+                `I sat on the cold stone floor of the temple, watching a beggar and a king pray. I read "${shortVerse}" from the ${source}. In that silence, "${primaryWord}" made sense. ${getCore()}`,
+                `People come to me with their grief. I hold their hands. Today I shared "${shortVerse}" from the ${source} with them. The divine doesn't care about hierarchy. ${getCore()}`
+            ]
+        },
+        {
+            name: "The Historian", class: "char-historian", title: "historian",
+            templates: [
+                `Look at the ${source}. The phrase "${shortVerse}" was written by desperate people under brutal empires. I've read the letters of soldiers who died for "${primaryWord}". ${getCore()}`,
+                `I went through the archives today. The writers of "${shortVerse}" in the ${source} were afraid. Just like us. We use these texts to build walls. ${getCore()}`
+            ]
+        },
+        {
+            name: "The Atheist", class: "char-skeptic", title: "skeptic",
+            templates: [
+                `I don't believe in God, but I believe in human empathy. I sat in a hospital waiting room today and read "${shortVerse}" from the ${source}. The doctors did the actual work. ${getCore()}`,
+                `The system uses "${primaryWord}" to keep people docile. I read "${shortVerse}" from the ${source}. The boss prays while cutting our wages. ${getCore()}`
+            ]
+        },
+        {
+            name: "The Universalist", class: "char-universal", title: "universal",
+            templates: [
+                `I met a refugee yesterday. We shared a meal. We read "${shortVerse}" from the ${source} together. Every tradition is a window. "${primaryWord}" is the act of breaking bread. ${getCore()}`,
+                `I volunteered at a shelter today. An atheist, a Christian, and a Sikh packed boxes. I read them "${shortVerse}" from the ${source}. ${getCore()}`
+            ]
+        },
+        {
+            name: "The CEO", class: "char-ceo", title: "ceo",
+            templates: [
+                `I was staring at my glowing laptop at 2 AM, looking at layoffs. I opened the ${source} and read "${shortVerse}". I have all the money, but my character is rotting. ${getCore()}`,
+                `In the boardroom, we are taught to separate ourselves. But the line "${shortVerse}" from the ${source} haunts me. I traded my soul for a golden parachute. ${getCore()}`
+            ]
+        },
+        {
+            name: "The Veteran Immigrant Worker", class: "char-worker", title: "worker",
+            templates: [
+                `I came to Canada from India. I've worked 30 years and done 50 odd jobs. Every time, after 9 months or a year, they try to kick me out. You can feel it—they don't want you there. When I read "${shortVerse}" from the ${source}, I wonder if my struggle is seen. ${getCore()}`,
+                `I stood on my feet for 9 hours today. A customer screamed at me. I opened the ${source} and read "${shortVerse}". My spirit is not for sale, even if the system treats me like a number. ${getCore()}`
+            ]
+        },
+        {
+            name: "The Administrator", class: "char-admin", title: "admin",
+            templates: [
+                `I processed the CEO's bonus, and then eviction papers. I read "${shortVerse}" from the ${source}. "${primaryWord}" is hard to reconcile behind this desk. ${getCore()}`,
+                `I spend my days filling out forms that decide fates. Today I read "${shortVerse}" in the ${source}. The system is broken, but the truth remains. ${getCore()}`
+            ]
+        },
+        {
+            name: "The Artist", class: "char-artist", title: "artist",
+            templates: [
+                `I painted a canvas today, but I was just copying what the gallery owner wanted. Then I read "${shortVerse}" in the ${source}. I am just painting the illusion. ${getCore()}`,
+                `I watched a street musician play for loose change. He played with more soul than the symphony. In his music, I heard "${shortVerse}" from the ${source}. ${getCore()}`
+            ]
+        },
+        {
+            name: "Nature & The Trees", class: "char-nature", title: "nature",
+            templates: [
+                `They cut down the old oak tree on my street today. The rain fell on the rich and the poor equally. I read "${shortVerse}" from the ${source}. "${primaryWord}" is the quiet balance you are destroying. ${getCore()}`,
+                `Humans forget they are part of this world. I saw "${shortVerse}" written in the ${source}. The trees do not hoard sunlight. You would not survive without this connection. ${getCore()}`
+            ]
+        },
+        {
+            name: "The Cosmos", class: "char-cosmos", title: "cosmos",
+            templates: [
+                `I am the universe looking at itself. You are made of dying stars. I watched you read "${shortVerse}" in the ${source}. You worry about titles and rent, but "${primaryWord}" is the gravity that holds galaxies. ${getCore()}`,
+                `You are floating on a rock lit up by a star. You read "${shortVerse}" in the ${source}. The light is always there, but you make each other miserable in boardrooms. ${getCore()}`
+            ]
+        }
+    ];
+
+    const shuffledPersonas = personas.sort(() => 0.5 - Math.random());
+
+    for(let i=0; i<shuffledPersonas.length; i++){
+        const speaker = shuffledPersonas[i];
+        const text = getRand(speaker.templates);
+        const randomDelay = Math.floor(Math.random() * 400) + 400; 
+        await new Promise(r=>setTimeout(r, randomDelay));
+        appendMessage(speaker.class, text, speaker.name, speaker.title);
     }
-    return null;
 }
 
 const getRand = (arr) => arr[Math.floor(Math.random() * arr.length)];
-
-async function generateDialogue(verse, source, word, crossRefs, userInput){
-    const crossRef = crossRefs.length > 0 ? getRand(crossRefs) : null;
-
-    const scholarTemplates = [
-        crossRef ? `It is fascinating to see this. The ${source} speaks of "${word}", and the ${crossRef.source} mirrors this concept beautifully. This points to a shared ancient archetype.` : `Looking at the ${source}, the emphasis on "${word}" is a pivotal literary device meant to anchor the audience's understanding of the divine.`,
-        `The textual tradition here is rich. The use of "${word}" in this context within the ${source} echoes themes found centuries earlier in other traditions.`,
-        `If we trace the etymology of "${word}" back, we find a deeply rooted concept of the sacred that transcends the specific language of the ${source}.`
-    ];
-
-    const mysticTemplates = [
-        `Words are just fingers pointing at the moon. Whether we read "${word}" in the ${source} or elsewhere, the true experience of the divine transcends human language. It is felt, not debated.`,
-        `The true meaning of "${word}" cannot be contained in a book. The ${source} is a map, but we must walk the territory ourselves to understand its depth.`,
-        `When I read about "${userInput}", I don't see a doctrine to argue over. I see a call to dissolve the ego and merge with the infinite light that the ${source} describes.`
-    ];
-
-    const historianTemplates = [
-        `Why do people divide over these texts? Because empires and kings used them to control populations. The true history shows that early followers of these traditions were deeply intertwined.`,
-        `The political climate when the ${source} was written is crucial. The term "${word}" wasn't just spiritual; it was a direct challenge to the dominant empires of that era.`,
-        `History reveals that the rigid boundaries between religions today didn't exist in the ancient world. The ${source} was part of a melting pot of spiritual ideas.`
-    ];
-
-    const skepticTemplates = [
-        `I appreciate the poetic view, but let's be realistic. Humans wrote these texts centuries apart. We are finding parallels because our brains are wired to find patterns.`,
-        `It's easy to read "${word}" and feel a sense of unity, but the ${source} has been used to justify terrible atrocities. We can't ignore the dark side of these texts.`,
-        `The exclusivity in religions was invented by humans to create "us vs. them". Claiming all paths lead to the same truth diminishes the unique, often contradictory claims of the ${source}.`
-    ];
-
-    const universalTemplates = [
-        `The Skeptic is right that humans invented the walls, but the foundation is real. If we truly belong to this universe, then every scripture is a different window looking into the same room.`,
-        `The concept of "${word}" in the ${source} is a reflection of our shared human longing for meaning. Every tradition is a different language trying to describe the same indescribable source.`,
-        `We are one universe expressing itself through many voices. When we hear "${userInput}" in the ${source}, we should hear the heartbeat of all humanity, not just one tribe.`
-    ];
-
-    const speakers = [
-        { name: "The Comparative Scholar", class: "char-scholar", title: "scholar", text: getRand(scholarTemplates) },
-        { name: "The Mystic", class: "char-mystic", title: "mystic", text: getRand(mysticTemplates) },
-        { name: "The Historian", class: "char-historian", title: "historian", text: getRand(historianTemplates) },
-        { name: "The Skeptic", class: "char-skeptic", title: "skeptic", text: getRand(skepticTemplates) },
-        { name: "The Universalist", class: "char-universal", title: "universal", text: getRand(universalTemplates) }
-    ];
-
-    for(let i=0; i<speakers.length; i++){
-        const randomDelay = Math.floor(Math.random() * 600) + 600; 
-        await new Promise(r=>setTimeout(r, randomDelay));
-        appendMessage(speakers[i].class, speakers[i].text, speakers[i].name, speakers[i].title);
-    }
-}
 
 function appendMessage(e,t,n=null,s=""){
     const i=document.getElementById('chatBox'),a=document.createElement('div');
     a.className=`message ${e}`;
     if(n){const e=document.createElement('span');e.className=`char-name ${s}`,e.innerText=n,a.appendChild(e)}
-    a.appendChild(document.createTextNode(t)),i.appendChild(a),i.scrollTop=i.scrollHeight
+    a.innerHTML += t;
+    i.appendChild(a);
 }
 window.onload=loadTexts;
 </script>
