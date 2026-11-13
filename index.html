@@ -213,14 +213,14 @@ async function startDialogue(){
         }
     };
 
-    // Changed to pull 1 reference per tradition so the chat doesn't take 10 minutes to read
-    addMatches(texts.bible, "Bible", 1);
-    addMatches(texts.quran, "Quran", 1);
-    addMatches(texts.vedas, "Rig Veda", 1);
-    addMatches(texts.buddhist, "Buddhist Texts", 1);
-    addMatches(texts.gurugranth, "Guru Granth Sahib", 1);
-    addMatches(texts.judaism, "Judaism", 1);
-    addMatches(texts.nature_way, "Nature & The Way", 1);
+    // 2 Verses per tradition (14 total)
+    addMatches(texts.bible, "Bible", 2);
+    addMatches(texts.quran, "Quran", 2);
+    addMatches(texts.vedas, "Rig Veda", 2);
+    addMatches(texts.buddhist, "Buddhist Texts", 2);
+    addMatches(texts.gurugranth, "Guru Granth Sahib", 2);
+    addMatches(texts.judaism, "Judaism", 2);
+    addMatches(texts.nature_way, "Nature & The Way", 2);
     
     if(allMatches.length === 0){
         appendMessage("system-msg",`Could not find matches or load text files.`);
@@ -229,7 +229,6 @@ async function startDialogue(){
     
     appendMessage("system-msg",`Found ${allMatches.length} references across traditions. Analyzing verses...`);
 
-    // Helper to map the text to the correct GitHub file
     const getFileName = (source) => {
         if(source.includes("Bible")) return "bible.txt";
         if(source.includes("Quran")) return "quran.txt";
@@ -245,11 +244,10 @@ async function startDialogue(){
         await new Promise(r=>setTimeout(r, 1000));
         
         const cleanText = allMatches[i].replace(/^[1-3]?\s*[a-zA-Z]+\s+\d+:\d+\s*/i, '').trim();
-        const words = cleanText.match(/[a-zA-Z]{4,}/g) || [];
-        const keywords = words.filter(w => !stopWords.includes(w.toLowerCase()));
-        const primaryWord = keywords.length > 0 ? keywords[0].toLowerCase() : n;
+        
+        // Use the user's query instead of extracting a random grammar word
+        const primaryWord = n;
 
-        // Make the Read Full Text button
         const fileName = getFileName(sourceTexts[i]);
         const readFullLink = `<br><br><a href="${fileName}" target="_blank" class="read-full-btn">📖 Read Full ${sourceTexts[i]} Text</a>`;
         
